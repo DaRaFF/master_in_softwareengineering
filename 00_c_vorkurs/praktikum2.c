@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <string.h>
+
+typedef double real;
+typedef double * pReal;
+
+
+//A16
+int printStringWithStrlen(){
+	char name[100] = "Ralph";
+	int nameLength;
+	nameLength = strlen(name);
+	printf("Mein Name ist %s\n", name);
+	printf("Der Name %s ist %d Zeichen lang\n", name, nameLength);
+}
+
+//A17 - sizeof bestimmt die Grösse des übergebenen Datentyps
+
+//A18
+
+//A19
+
+//A20
+
+//A21 - Auf Arbeitsblatt korrekt gelöst
+
+//A22
+void printNewDataTypeReal(){
+	real newReal = 22.0;
+	pReal newPReal = &newReal;
+	newReal = 30.0;
+	printf("hmm %f %f\n", newReal, *newPReal);
+	printf("uiui\n");
+}
+
+//A23
+void printVector(){
+	int intArray[7] = {10,20,30,40,50,60,70};
+	for(int i = 0; i < 7; i++){
+		printf("Der intArray an Position %d enthält die Zahl %d\n", i, intArray[i]);
+	}
+}
+
+//A24
+void mean(double array[], int length){
+	double mean = 0.0, total;	
+	for(int i = 0; i < length; i++){
+		total += array[i];	
+	}
+	mean = total / length;
+	printf("Der Mittelwert des Arrays beträgt %.1f\n", mean);
+}
+
+//A27
+
+//A28
+
+int main(int argc, char* argv[]){
+	printStringWithStrlen();
+	printNewDataTypeReal();
+	printVector();
+	double meanArray[] = {1.0,2.0,3.0,4.0,5.0}; 
+	mean(meanArray,5);
+    	for (int i=1; i<argc; i++) { //A25
+        	printf("Das Argument %d ist %s\n", i, argv[i]);
+    	}
+	return 0;
+}
