@@ -1,0 +1,690 @@
+%!PS-Adobe-3.0
+%%Creator: A2ps version 4.3
+%%CreationDate: Tue May 11 08:20:27 2010
+%%Pages: (atend)
+%%DocumentFonts: Courier Courier-Bold Helvetica Helvetica-Bold
+%%EndComments
+% Copyright (c) 1993, 1994, Miguel Santana, M.Santana@frgu.bull.fr
+
+/$a2psdict 100 dict def
+$a2psdict begin
+
+% General macros.
+/xdef {exch def} bind def
+/getfont {exch findfont exch scalefont} bind def
+
+% Set up ISO Latin 1 character encoding
+/reencodeISO {
+	dup dup findfont dup length dict begin
+	{ 1 index /FID ne { def }{ pop pop } ifelse
+	} forall
+	/Encoding ISOLatin1Encoding def
+	currentdict end definefont
+} def
+/Helvetica-Bold reencodeISO def
+/Helvetica reencodeISO def
+/Courier reencodeISO def
+/Courier-Bold reencodeISO def
+
+% Create Courier backspace font
+/backspacefont {
+    /Courier findfont dup length dict begin
+	{ % forall
+	    1 index /FID eq { pop pop } { def } ifelse
+	} forall
+	currentdict /UniqueID known { % if
+	    /UniqueID UniqueID 16#800000 xor def
+	} if
+	CharStrings length 1 add dict begin
+	    CharStrings { def } forall
+	    /backspace { -600 0 0 0 0 0 setcachedevice } bind def
+	    currentdict
+	end
+	/CharStrings exch def
+	/Encoding Encoding 256 array copy def
+	Encoding 8 /backspace put
+	currentdict
+    end
+    definefont pop
+} bind def
+
+% FUNCTIONS
+
+% Function filename: Initialize file printing.
+/fn
+{ /filenm xdef
+  /filenmwidth filenm stringwidth pop def
+  /filenmfont
+       filenmwidth fns gt
+       {
+	       filenmfontname
+	       fnfs fns mul filenmwidth div
+	     getfont
+       }
+       { sfnf }
+     ifelse
+  def
+} bind def
+
+% Function header: prints page header. no page
+% is passed as argument.
+/hp
+  { x sd get  y sd get hs sub 1 add  moveto
+    df setfont
+    gsave
+      x sd get y sd get moveto
+      0 hs 2 div neg rmoveto 
+      hs setlinewidth
+      0.95 setgray
+      pw 0 rlineto stroke
+    grestore
+    gsave
+      dfs hm rmoveto
+      d show				% date/hour
+    grestore
+    gsave
+      pnum cvs pop				% page pop up
+        pw (Page 999) stringwidth pop sub
+        hm
+	  rmoveto
+      (Page ) show pnum show		% page number
+    grestore
+    empty pnum copy pop
+    gsave
+      filenmfont setfont
+         fns filenm stringwidth pop sub 2 div dw add
+          bm 2 mul 
+        add 
+        hm
+      rmoveto
+        filenm show			% file name
+      grestore
+    } bind def
+
+% Function border: prints border page
+/border 
+{ x sd get y sd get moveto
+  gsave				% print four sides
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function hborder: completes border of the header.
+/hborder 
+{ gsave
+	0.7 setlinewidth
+	0 hs neg rmoveto
+	pw 0 rlineto
+	stroke
+  grestore
+} bind def
+
+% Function sheetnumber: prints the sheet number.
+/sn
+    { snx sny moveto
+      df setfont
+      pnum cvs
+	  dup stringwidth pop (0) stringwidth pop sub neg 0 rmoveto show
+      empty pnum copy pop
+    } bind def
+
+% Function loginprint: prints the login id of the requestor.
+/lgp
+    { lx ly moveto
+      df setfont
+      dup stringwidth pop neg 0 rmoveto show
+    } bind def
+
+% Function currentdate: prints the current date.
+/cd
+    { dx dy moveto
+      df setfont
+      (Printed: ) show
+      td show
+    } bind def
+
+% Function filename_footer: prints the file name at bottom of page.
+/fnf
+    { fnx fny moveto
+      df setfont
+      filenm center show
+    } bind def
+
+% Function center: centers text.
+/center
+    { dup stringwidth pop
+      2 div neg 0 rmoveto
+    } bind def
+
+% Function s: print a source line
+/s  { show
+      /y0 y0 bfs sub def
+      x0 y0 moveto
+    } bind def
+
+% Functions b and st: change to bold or standard font
+/b  { show
+      bdf setfont
+    } bind def
+/st { show
+      bf setfont
+    } bind def
+
+% Strings used to make easy printing numbers
+/pnum 12 string def
+/empty 12 string def
+
+% Global initializations
+
+/CourierBack backspacefont
+/filenmfontname /Helvetica-Bold def
+/inch {72 mul} bind def
+
+%
+% Meaning of some variables and functions (coded names)
+%
+%	twp:		twinpages?
+%	sd:		sheet side
+%	l:		line counter
+%	c:		column counter
+%	d:		date
+%	td:		current date (for today)
+%	lg:		login name
+%	fn:		filename printing function
+%	sn:		sheetnumber printing function
+%	cd:		current date printing function
+%	fnf:		filename footer printing function
+%	lgp:		login printing function
+%	hp:		header printing function
+%	y:		y coordinate for the logical page
+%	x:		x coordinate for the logical page
+%	sny:		y coordinate for the sheet number
+%	snx:		x coordinate for the sheet number
+%	dy:		y coordinate for the date
+%	dx:		x coordinate for the date
+%	ly:		y coordinate for the login
+%	lx:		x coordinate for the login
+%	scx:		x coordinate for the sheet center
+%	fny:		y coordinate for the filename (footer)
+%	fnx:		x coordinate for the filename (footer)
+%	fnfs:		filename font size
+%	bfs:		body font size
+%	dfs:		date font size
+%	bfs:		body font size
+%	df:		date font
+%	bf:		body font
+%	bdf:		bold font
+%	sfnf:		standard filename font
+%	dw:		date width
+%	pw:		page width
+%	sw:		sheet width
+%	ph:		page height
+%	sh:		sheet height
+%	hm:		header margin
+%	tm:		top margin
+%	bm:		body margin
+%	rm:		right margin
+%	lm:		left margin
+%	hs:		header size
+%	fns:		filename size
+
+% Initialize page description variables.
+/x0 0 def
+/y0 0 def
+/sh 11.64 inch def
+/sw 8.27 inch def
+/margin 1.4 inch def
+/rm margin 3 div def
+/lm margin 2 mul 3 div def
+/d () def
+/td (May 11 2010 08:20) def
+/lg (Printed by Thomas Letsch from Orion1) def
+%%EndProlog
+
+/docsave save def
+%%Page: 1 1
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (May 11 2010 08:18) def
+( FahrzeugeTest.java ) fn
+sw 0 translate
+90 rotate
+1 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|//==============================================================================) s
+(   2|//        * Letsch Informatik *       www.LetsInfo.ch       CH-8636 Wald) s
+(   3|//          Beratung, Ausbildung und Realisation in Software-Engineering) s
+(   4|//==============================================================================) s
+(   5|// Project   : Master of Advanced Studies in Software-Engineering 2010) s
+(   6|// Modul     : OO-Einf\374hrung mit UML und Java) s
+(   7|//             Teil: UML -> Java) s
+(   8|// Title     : \334bung 5: Klassen-Hierarchie 'Fahrzeuge') s
+(   9|// Author    : Thomas Letsch) s
+(  10|// Tab-Width : 2) s
+(  11|/*///===========================================================================) s
+(  12|) s
+(  13|* Description: ) s
+(  14|Klassen-Hierarchie mit "Fahrzeug" als Basis-Klasse. ) s
+(  15|Klasse "Strassenfahrzeug" und "Wasserfahrzeug" davon abgeleitet.) s
+(  16|Strassenfahrzeug zus\344tzlich mit zur\374ckgelegten Kilometer.) s
+(  17|Wasserfahrzeug zus\344tzlich mit zur\374ckgelegten Seemeilen.) s
+(  18|) s
+(  19|* History    :) s
+(  20|02.05.1999: Initial-Version ) s
+(  21|07.05.2000: WIN32) s
+(  22|10.05.2001: WIN32-spezielle Anpassungen gel\366scht.) s
+(  23|14.05.2001: Fahrzeug::fahren\(\) mit korrektem Trace. ) s
+(  24|18.04.2002: Von C++ auf Java portiert.) s
+(  25|07.05.2003: Neue File-Aufteilung betref Eclipse.) s
+(  26|06.05.2004: Kosmetik.) s
+(  27|21.08.2005: Fahrzeug::printInfos\(\); public -> protected.) s
+(  28|07.05.2007: Referenz-Typ nur noch 'Fahrzeug'.) s
+(  29|CVS: $Revision: 1.10 $  $Date: 2008/05/05 12:30:56 $ ) s
+(  30|/*///===========================================================================) s
+(  31|//       1         2         3         4         5         6         7         8) s
+(  32|//345678901234567890123456789012345678901234567890123456789012345678901234567890) s
+(  33|//==============================================================================) s
+(  34|) s
+(  35|) s
+(  36|public class FahrzeugeTest {) s
+(  37|) s
+(  38|  public static void main\(String[] args\) {) s
+(  39|        ) s
+(  40|    System.out.println\("\\n=== fz = new Fahrzeug\(0, 0\): ================"\);) s
+(  41|    Fahrzeug fz = new Fahrzeug\(0, 0\);) s
+(  42|    System.out.println\("=== fz.fahren\(3, 4\): ========================"\);) s
+(  43|    fz.fahren\(3, 4\);) s
+(  44|    fz.printlnInfos\("fz"\);) s
+(  45|    System.out.println\("\\n=== fz.fahren\(-1, 1\): ======================="\);) s
+(  46|    fz.fahren\(-1, 1\);) s
+(  47|    fz.printlnInfos\("fz"\);) s
+(  48|    ) s
+(  49|    System.out.println\("\\n=== sfz = new Strassenfahrzeug\(0, 0, 0\): ==="\);) s
+(  50|    Fahrzeug sfz = new Strassenfahrzeug\(0, 0, 0\);) s
+(  51|    System.out.println\("=== sfz.fahren\(3, 4\): ======================"\);) s
+(  52|    sfz.fahren\(3, 4\);) s
+(  53|    sfz.printlnInfos\("sfz"\);) s
+(  54|    System.out.println\("\\n=== sfz.fahren\(-1, 1\): ====================="\);) s
+(  55|    sfz.fahren\(-1, 1\);) s
+(  56|    sfz.printlnInfos\("sfz"\);) s
+(  57|    ) s
+(  58|    System.out.println\("\\n=== wfz = new Wasserfahrzeug\(0, 0, 0\): ==="\);) s
+(  59|    Fahrzeug wfz = new Wasserfahrzeug\(0, 0, 0\);) s
+(  60|    System.out.println\("=== wfz.fahren\(3, 4\): ======================"\);) s
+(  61|    wfz.fahren\(3, 4\);) s
+(  62|    wfz.printlnInfos\("wfz"\);) s
+(  63|    ) s
+(  64|  }) s
+(  65|) s
+(  66|}) s
+(  67|) s
+/sd 1 def
+2 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(  68|) s
+(  69|/* Session-Log:) s
+(  70|) s
+(  71|=== fz = new Fahrzeug\(0, 0\): ================) s
+(  72|=== fz.fahren\(3, 4\): ========================) s
+(  73|Fahrzeug.fahren\(\): 5.0) s
+(  74|fz: Koord = 3.0/4.0) s
+(  75|) s
+(  76|=== fz.fahren\(-1, 1\): =======================) s
+(  77|Fahrzeug.fahren\(\): 5.0) s
+(  78|fz: Koord = -1.0/1.0) s
+(  79|) s
+(  80|=== sfz = new Strassenfahrzeug\(0, 0, 0\): ===) s
+(  81|=== sfz.fahren\(3, 4\): ======================) s
+(  82|Fahrzeug.fahren\(\): 5.0) s
+(  83|Strassenfahrzeug.fahren\(\): total KM: 5.0) s
+(  84|sfz: Koord = 3.0/4.0    KM = 5.0) s
+(  85|) s
+(  86|=== sfz.fahren\(-1, 1\): =====================) s
+(  87|Fahrzeug.fahren\(\): 5.0) s
+(  88|Strassenfahrzeug.fahren\(\): total KM: 10.0) s
+(  89|sfz: Koord = -1.0/1.0   KM = 10.0) s
+(  90|) s
+(  91|=== wfz = new Wasserfahrzeug\(0, 0, 0\): ===) s
+(  92|=== wfz.fahren\(3, 4\): ======================) s
+(  93|Fahrzeug.fahren\(\): 5.0) s
+(  94|Wasserfahrzeug.fahren\(\): total SM: 2.6997840172786174) s
+(  95|wfz: Koord = 3.0/4.0    SM = 2.6997840172786174) s
+(  96|) s
+(  97|*/) s
+/sd 0 def
+1 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+%%Page: 2 2
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (May 11 2010 08:18) def
+( Fahrzeug.java ) fn
+sw 0 translate
+90 rotate
+1 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|// MAS-SE-10: \334bung 5: Klassen-Hierarchie 'Fahrzeuge') s
+(   2|) s
+(   3|class Fahrzeug {) s
+(   4|  ) s
+(   5|  private double mPosX;) s
+(   6|  private double mPosY;) s
+(   7|  ) s
+(   8|  ) s
+(   9|  public Fahrzeug\(double pXinit, double pYinit\) {) s
+(  10|    mPosX = pXinit;) s
+(  11|    mPosY = pYinit;) s
+(  12|  }) s
+(  13|  ) s
+(  14|  ) s
+(  15|  public double fahren\(double pX, double pY\) {) s
+(  16|    System.out.print\("Fahrzeug.fahren\(\): "\);) s
+(  17|    double xDiff = mPosX - pX;) s
+(  18|    double yDiff = mPosY - pY;) s
+(  19|    double km = Math.sqrt\(xDiff * xDiff + yDiff * yDiff\);) s
+(  20|    mPosX = pX;) s
+(  21|    mPosY = pY;) s
+(  22|    System.out.println\(km\);) s
+(  23|    return km;) s
+(  24|  }) s
+(  25|  ) s
+(  26|  ) s
+(  27|  protected void printInfos\(String pPrefix\) {) s
+(  28|    System.out.print\(pPrefix + ": Koord = " + mPosX + "/" + mPosY\);) s
+(  29|  }) s
+(  30|  ) s
+(  31|  ) s
+(  32|  public void printlnInfos\(String pPrefix\) {) s
+(  33|    printInfos\(pPrefix\);) s
+(  34|    System.out.print\("\\n"\);) s
+(  35|  } ) s
+(  36|  ) s
+(  37|  ) s
+(  38|  public double getPosX\(\) {) s
+(  39|    return mPosX;) s
+(  40|  }) s
+(  41|  ) s
+(  42|  ) s
+(  43|  public double getPosY\(\) {) s
+(  44|    return mPosY;) s
+(  45|  }) s
+(  46|  ) s
+(  47|}) s
+/sd 1 def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 1 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (May 11 2010 08:18) def
+( Strassenfahrzeug.java ) fn
+1 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|// MAS-SE-10: \334bung 5: Klassen-Hierarchie 'Fahrzeuge') s
+(   2|) s
+(   3|class Strassenfahrzeug extends Fahrzeug {) s
+(   4|  ) s
+(   5|  private double mKM; // gefahrene Kilometer) s
+(   6|  ) s
+(   7|  ) s
+(   8|  public Strassenfahrzeug\(double pXinit, double pYinit, double pKMinit\) {) s
+(   9|    super\(pXinit, pYinit\); // Aufruf des Konstruktors der Basis-Klasse) s
+(  10|    mKM = pKMinit;) s
+(  11|  }) s
+(  12|  ) s
+(  13|  ) s
+(  14|  public double fahren\(double pX, double pY\) {) s
+(  15|    double km = super.fahren\(pX, pY\);) s
+(  16|    mKM = mKM + km;) s
+(  17|    System.out.println\("Strassenfahrzeug.fahren\(\): total KM: " + mKM\);) s
+(  18|    return km;) s
+(  19|  }) s
+(  20|  ) s
+(  21|  ) s
+(  22|  public void printlnInfos\(String pPrefix\) {) s
+(  23|    printInfos\(pPrefix\);) s
+(  24|    System.out.println\("\\tKM = " + mKM\);) s
+(  25|  }) s
+(  26|  ) s
+(  27|}) s
+/sd 0 def
+2 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+%%Page: 3 3
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (May 11 2010 08:18) def
+( Wasserfahrzeug.java ) fn
+sw 0 translate
+90 rotate
+1 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|// MAS-SE-10: \334bung 5: Klassen-Hierarchie 'Fahrzeuge') s
+(   2|) s
+(   3|class Wasserfahrzeug extends Fahrzeug {) s
+(   4|  ) s
+(   5|  private double mSM; // gefahrene Seemeilen) s
+(   6|  ) s
+(   7|  ) s
+(   8|  public Wasserfahrzeug\(double pXinit, double pYinit, double pSMinit\) {) s
+(   9|    super\(pXinit, pYinit\); // Aufruf des Konstruktors der Basis-Klasse) s
+(  10|    mSM = pSMinit;) s
+(  11|  }) s
+(  12|  ) s
+(  13|  ) s
+(  14|  public double fahren\(double pX, double pY\) {) s
+(  15|    double km = super.fahren\(pX, pY\);) s
+(  16|    mSM = mSM + \(km / 1.852\);) s
+(  17|    System.out.println\("Wasserfahrzeug.fahren\(\): total SM: " + mSM\);) s
+(  18|    return km;) s
+(  19|  }) s
+(  20|  ) s
+(  21|  ) s
+(  22|  public void printlnInfos\(String pPrefix\) {) s
+(  23|    printInfos\(pPrefix\);) s
+(  24|    System.out.println\("\\tSM = " + mSM\);) s
+(  25|  }) s
+(  26|  ) s
+(  27|}) s
+/sd 1 def
+/sd 0 def
+3 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+
+%%Trailer
+%%Pages: 3
+docsave restore end
