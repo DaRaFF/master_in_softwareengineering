@@ -1,0 +1,579 @@
+%!PS-Adobe-3.0
+%%Creator: A2ps version 4.3
+%%CreationDate: Tue Jun  8 10:02:29 2010
+%%Pages: (atend)
+%%DocumentFonts: Courier Courier-Bold Helvetica Helvetica-Bold
+%%EndComments
+% Copyright (c) 1993, 1994, Miguel Santana, M.Santana@frgu.bull.fr
+
+/$a2psdict 100 dict def
+$a2psdict begin
+
+% General macros.
+/xdef {exch def} bind def
+/getfont {exch findfont exch scalefont} bind def
+
+% Set up ISO Latin 1 character encoding
+/reencodeISO {
+	dup dup findfont dup length dict begin
+	{ 1 index /FID ne { def }{ pop pop } ifelse
+	} forall
+	/Encoding ISOLatin1Encoding def
+	currentdict end definefont
+} def
+/Helvetica-Bold reencodeISO def
+/Helvetica reencodeISO def
+/Courier reencodeISO def
+/Courier-Bold reencodeISO def
+
+% Create Courier backspace font
+/backspacefont {
+    /Courier findfont dup length dict begin
+	{ % forall
+	    1 index /FID eq { pop pop } { def } ifelse
+	} forall
+	currentdict /UniqueID known { % if
+	    /UniqueID UniqueID 16#800000 xor def
+	} if
+	CharStrings length 1 add dict begin
+	    CharStrings { def } forall
+	    /backspace { -600 0 0 0 0 0 setcachedevice } bind def
+	    currentdict
+	end
+	/CharStrings exch def
+	/Encoding Encoding 256 array copy def
+	Encoding 8 /backspace put
+	currentdict
+    end
+    definefont pop
+} bind def
+
+% FUNCTIONS
+
+% Function filename: Initialize file printing.
+/fn
+{ /filenm xdef
+  /filenmwidth filenm stringwidth pop def
+  /filenmfont
+       filenmwidth fns gt
+       {
+	       filenmfontname
+	       fnfs fns mul filenmwidth div
+	     getfont
+       }
+       { sfnf }
+     ifelse
+  def
+} bind def
+
+% Function header: prints page header. no page
+% is passed as argument.
+/hp
+  { x sd get  y sd get hs sub 1 add  moveto
+    df setfont
+    gsave
+      x sd get y sd get moveto
+      0 hs 2 div neg rmoveto 
+      hs setlinewidth
+      0.95 setgray
+      pw 0 rlineto stroke
+    grestore
+    gsave
+      dfs hm rmoveto
+      d show				% date/hour
+    grestore
+    gsave
+      pnum cvs pop				% page pop up
+        pw (Page 999) stringwidth pop sub
+        hm
+	  rmoveto
+      (Page ) show pnum show		% page number
+    grestore
+    empty pnum copy pop
+    gsave
+      filenmfont setfont
+         fns filenm stringwidth pop sub 2 div dw add
+          bm 2 mul 
+        add 
+        hm
+      rmoveto
+        filenm show			% file name
+      grestore
+    } bind def
+
+% Function border: prints border page
+/border 
+{ x sd get y sd get moveto
+  gsave				% print four sides
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function hborder: completes border of the header.
+/hborder 
+{ gsave
+	0.7 setlinewidth
+	0 hs neg rmoveto
+	pw 0 rlineto
+	stroke
+  grestore
+} bind def
+
+% Function sheetnumber: prints the sheet number.
+/sn
+    { snx sny moveto
+      df setfont
+      pnum cvs
+	  dup stringwidth pop (0) stringwidth pop sub neg 0 rmoveto show
+      empty pnum copy pop
+    } bind def
+
+% Function loginprint: prints the login id of the requestor.
+/lgp
+    { lx ly moveto
+      df setfont
+      dup stringwidth pop neg 0 rmoveto show
+    } bind def
+
+% Function currentdate: prints the current date.
+/cd
+    { dx dy moveto
+      df setfont
+      (Printed: ) show
+      td show
+    } bind def
+
+% Function filename_footer: prints the file name at bottom of page.
+/fnf
+    { fnx fny moveto
+      df setfont
+      filenm center show
+    } bind def
+
+% Function center: centers text.
+/center
+    { dup stringwidth pop
+      2 div neg 0 rmoveto
+    } bind def
+
+% Function s: print a source line
+/s  { show
+      /y0 y0 bfs sub def
+      x0 y0 moveto
+    } bind def
+
+% Functions b and st: change to bold or standard font
+/b  { show
+      bdf setfont
+    } bind def
+/st { show
+      bf setfont
+    } bind def
+
+% Strings used to make easy printing numbers
+/pnum 12 string def
+/empty 12 string def
+
+% Global initializations
+
+/CourierBack backspacefont
+/filenmfontname /Helvetica-Bold def
+/inch {72 mul} bind def
+
+%
+% Meaning of some variables and functions (coded names)
+%
+%	twp:		twinpages?
+%	sd:		sheet side
+%	l:		line counter
+%	c:		column counter
+%	d:		date
+%	td:		current date (for today)
+%	lg:		login name
+%	fn:		filename printing function
+%	sn:		sheetnumber printing function
+%	cd:		current date printing function
+%	fnf:		filename footer printing function
+%	lgp:		login printing function
+%	hp:		header printing function
+%	y:		y coordinate for the logical page
+%	x:		x coordinate for the logical page
+%	sny:		y coordinate for the sheet number
+%	snx:		x coordinate for the sheet number
+%	dy:		y coordinate for the date
+%	dx:		x coordinate for the date
+%	ly:		y coordinate for the login
+%	lx:		x coordinate for the login
+%	scx:		x coordinate for the sheet center
+%	fny:		y coordinate for the filename (footer)
+%	fnx:		x coordinate for the filename (footer)
+%	fnfs:		filename font size
+%	bfs:		body font size
+%	dfs:		date font size
+%	bfs:		body font size
+%	df:		date font
+%	bf:		body font
+%	bdf:		bold font
+%	sfnf:		standard filename font
+%	dw:		date width
+%	pw:		page width
+%	sw:		sheet width
+%	ph:		page height
+%	sh:		sheet height
+%	hm:		header margin
+%	tm:		top margin
+%	bm:		body margin
+%	rm:		right margin
+%	lm:		left margin
+%	hs:		header size
+%	fns:		filename size
+
+% Initialize page description variables.
+/x0 0 def
+/y0 0 def
+/sh 11.64 inch def
+/sw 8.27 inch def
+/margin 1.4 inch def
+/rm margin 3 div def
+/lm margin 2 mul 3 div def
+/d () def
+/td (Jun  8 2010 10:02) def
+/lg (Printed by Thomas Letsch from Orion1) def
+%%EndProlog
+
+/docsave save def
+%%Page: 1 1
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (Jun  8 2010 09:51) def
+( WarenAutomatTest.java ) fn
+sw 0 translate
+90 rotate
+1 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|//==============================================================================) s
+(   2|// Project   : Master of Advanced Studies in Software-Engineering 2010) s
+(   3|// Modul     : Projektarbeit OO Softwareentwicklung "Warenautomat") s
+(   4|//             Teil: Design&Implementation) s
+(   5|// Title     : Test-Applikation) s
+(   6|// Author    : `Ihr Name`) s
+(   7|// Tab-Width : 2) s
+(   8|/*///===========================================================================) s
+(   9|) s
+(  10|* Description:) s
+(  11|Test-Applikation um die Klassen-Bibliothek des Waren-Automaten zu testen.) s
+(  12|) s
+(  13|* History    :) s
+(  14|14.09.2005: Initial-Version.) s
+(  15|02.06.2008: GUI hinzugef\374gt.) s
+(  16|CVS: $Revision: 1.5 $  $Date: 2010/06/07 19:08:15 $ ) s
+(  17|/*///===========================================================================) s
+(  18|//       1         2         3         4         5         6         7         8) s
+(  19|//345678901234567890123456789012345678901234567890123456789012345678901234567890) s
+(  20|//==============================================================================) s
+(  21|) s
+(  22|import WarenAutomat.*;) s
+(  23|) s
+(  24|import java.text.DateFormat;) s
+(  25|import java.text.ParseException;) s
+(  26|import java.util.Locale;) s
+(  27|) s
+(  28|public class WarenAutomatTest { ) s
+(  29|) s
+(  30|  public static void main\(String[] args\) throws ParseException {) s
+(  31|) s
+(  32|    DateFormat df = DateFormat.getDateInstance\(DateFormat.MEDIUM, Locale.GERMAN\);) s
+(  33|) s
+(  34|    { ) s
+(  35|      Automat automat = new Automat\(\);) s
+(  36|      System.out.println\("=== Drehteller-Test: ================================="\);) s
+(  37|      ) s
+(  38|      System.out.println\("*** Drehteller Nr.1 mit einem \\"Eins\\" f\374llen:"\);) s
+(  39|      automat.fuelleFach\(1, "Eins", 1.00, df.parse\("01.01.2001"\)\);) s
+(  40|      System.out.println\("*** automat.drehen\(\):"\);      ) s
+(  41|      automat.drehen\(\);) s
+(  42|//      System.out.println\("*** Drehteller Nr.2 mit einem \\"Zwei\\" f\374llen:"\);) s
+(  43|//      automat.fuelleFach\(2, "Zwei", 2.00, df.parse\("01.01.2002"\)\);) s
+(  44|//      SystemSoftware.output\(false\);) s
+(  45|//      System.out.println\("*** automat.drehen\(\):"\);      ) s
+(  46|//      automat.drehen\(\);) s
+(  47|//      SystemSoftware.output\(true\);) s
+(  48|//      System.out.println\("*** Drehteller Nr.3 mit einem \\"Drei\\" f\374llen:"\);) s
+(  49|//      automat.fuelleFach\(3, "Drei", 3.00, df.parse\("01.01.2003"\)\);) s
+(  50|//      SystemSoftware.output\(false\);) s
+(  51|//      System.out.println\("*** Drehen bis Fach Nr.16 vor der \326ffnung ist:"\);) s
+(  52|//      for \(int i = 4; i <= 16; i++\) {) s
+(  53|//        automat.drehen\(\);) s
+(  54|//      }) s
+(  55|//      SystemSoftware.output\(true\);) s
+(  56|//      System.out.println\("*** automat.drehen\(\): jetzt Fach Nr. 1:"\);      ) s
+(  57|//      automat.drehen\(\);) s
+(  58|//      System.out.println\("*** automat.drehen\(\): jetzt Fach Nr. 2:"\);      ) s
+(  59|//      automat.drehen\(\);) s
+(  60|//      System.out.println\("*** automat.drehen\(\): jetzt Fach Nr. 3:"\);      ) s
+(  61|//      automat.drehen\(\);) s
+(  62|//        ) s
+(  63|//      System.out.println\("=== Drehteller-Test. =================================") s
+(    +\);) s
+(  64|// ) s
+/sd 1 def
+2 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(  65|      ) s
+(  66|//      System.out.println\("=== \326ffnen-Test: =====================================") s
+(    +\);) s
+(  67|//) s
+(  68|//      System.out.println\("*** Drehteller Nr.5 mit einem Mars f\374llen:"\);) s
+(  69|//      automat.fuelleFach\(5, "Mars", 1.50, df.parse\("01.01.2100"\)\);) s
+(  70|//      System.out.println\("*** Automat.gibTotalenWarenWert\(\) = " ) s
+(  71|//          + automat.gibTotalenWarenWert\(\)\);) s
+(  72|//      Kasse kasse = automat.gibKasse\(\);) s
+(  73|//      System.out.println\("*** kasse.einnehmen\(1.00\):"\);) s
+(  74|//      kasse.einnehmen\(1.00\);) s
+(  75|//      System.out.println\("*** kasse.einnehmen\(0.50\):"\);) s
+(  76|//      kasse.einnehmen\(0.50\);) s
+(  77|//      System.out.println\("*** automat.oeffnen\(5\):"\);) s
+(  78|//      System.out.println\("*** automat.oeffnen\(5\): " + automat.oeffnen\(5\)\);) s
+(  79|//      ) s
+(  80|//      System.out.println\("=== \326ffnen-Test. =====================================") s
+(    +\);) s
+(  81|//     ) s
+(  82|//      // ... etc. ...) s
+(  83|      ) s
+(  84|    }) s
+(  85|    ) s
+(  86|  }) s
+(  87|) s
+(  88|}) s
+(  89|) s
+/sd 0 def
+1 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+%%Page: 2 2
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (Jun  8 2010 09:51) def
+( WarenAutomatTest.java ) fn
+sw 0 translate
+90 rotate
+3 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(  90|) s
+(  91|/* Session-Log:) s
+(  92|) s
+(  93|=== Drehteller-Test: =================================) s
+(  94|*** Drehteller Nr.1 mit einem "Eins" f\374llen:) s
+(  95|SystemSoftware::zeigeWarenPreisAn\(\):  1: 1.0) s
+(  96|SystemSoftware::zeigeVerfallsDatum\(\): 1: 2) s
+(  97|*** automat.drehen\(\):) s
+(  98|SystemSoftware::zeigeWarenPreisAn\(\):  1: 0.0) s
+(  99|SystemSoftware::zeigeVerfallsDatum\(\): 1: 0) s
+( 100|SystemSoftware::zeigeWarenPreisAn\(\):  2: 0.0) s
+( 101|SystemSoftware::zeigeVerfallsDatum\(\): 2: 0) s
+( 102|SystemSoftware::zeigeWarenPreisAn\(\):  3: 0.0) s
+( 103|SystemSoftware::zeigeVerfallsDatum\(\): 3: 0) s
+( 104|SystemSoftware::zeigeWarenPreisAn\(\):  4: 0.0) s
+( 105|SystemSoftware::zeigeVerfallsDatum\(\): 4: 0) s
+( 106|SystemSoftware::zeigeWarenPreisAn\(\):  5: 0.0) s
+( 107|SystemSoftware::zeigeVerfallsDatum\(\): 5: 0) s
+( 108|SystemSoftware::zeigeWarenPreisAn\(\):  6: 0.0) s
+( 109|SystemSoftware::zeigeVerfallsDatum\(\): 6: 0) s
+( 110|SystemSoftware::zeigeWarenPreisAn\(\):  7: 0.0) s
+( 111|SystemSoftware::zeigeVerfallsDatum\(\): 7: 0) s
+( 112|*** Drehteller Nr.2 mit einem "Zwei" f\374llen:) s
+( 113|SystemSoftware::zeigeWarenPreisAn\(\):  2: 2.0) s
+( 114|SystemSoftware::zeigeVerfallsDatum\(\): 2: 2) s
+( 115|SystemSoftware::output\(\): false) s
+( 116|*** automat.drehen\(\):) s
+( 117|SystemSoftware::output\(\): true) s
+( 118|*** Drehteller Nr.3 mit einem "Drei" f\374llen:) s
+( 119|SystemSoftware::zeigeWarenPreisAn\(\):  3: 3.0) s
+( 120|SystemSoftware::zeigeVerfallsDatum\(\): 3: 2) s
+( 121|SystemSoftware::output\(\): false) s
+( 122|*** Drehen bis Fach Nr.16 vor der \326ffnung ist:) s
+( 123|SystemSoftware::output\(\): true) s
+( 124|*** automat.drehen\(\): jetzt Fach Nr. 1:) s
+( 125|SystemSoftware::zeigeWarenPreisAn\(\):  1: 1.0) s
+( 126|SystemSoftware::zeigeVerfallsDatum\(\): 1: 2) s
+( 127|SystemSoftware::zeigeWarenPreisAn\(\):  2: 0.0) s
+( 128|SystemSoftware::zeigeVerfallsDatum\(\): 2: 0) s
+( 129|SystemSoftware::zeigeWarenPreisAn\(\):  3: 0.0) s
+( 130|SystemSoftware::zeigeVerfallsDatum\(\): 3: 0) s
+( 131|SystemSoftware::zeigeWarenPreisAn\(\):  4: 0.0) s
+( 132|SystemSoftware::zeigeVerfallsDatum\(\): 4: 0) s
+( 133|SystemSoftware::zeigeWarenPreisAn\(\):  5: 0.0) s
+( 134|SystemSoftware::zeigeVerfallsDatum\(\): 5: 0) s
+( 135|SystemSoftware::zeigeWarenPreisAn\(\):  6: 0.0) s
+( 136|SystemSoftware::zeigeVerfallsDatum\(\): 6: 0) s
+( 137|SystemSoftware::zeigeWarenPreisAn\(\):  7: 0.0) s
+( 138|SystemSoftware::zeigeVerfallsDatum\(\): 7: 0) s
+( 139|*** automat.drehen\(\): jetzt Fach Nr. 2:) s
+( 140|SystemSoftware::zeigeWarenPreisAn\(\):  1: 0.0) s
+( 141|SystemSoftware::zeigeVerfallsDatum\(\): 1: 0) s
+( 142|SystemSoftware::zeigeWarenPreisAn\(\):  2: 2.0) s
+( 143|SystemSoftware::zeigeVerfallsDatum\(\): 2: 2) s
+( 144|SystemSoftware::zeigeWarenPreisAn\(\):  3: 0.0) s
+( 145|SystemSoftware::zeigeVerfallsDatum\(\): 3: 0) s
+( 146|SystemSoftware::zeigeWarenPreisAn\(\):  4: 0.0) s
+( 147|SystemSoftware::zeigeVerfallsDatum\(\): 4: 0) s
+( 148|SystemSoftware::zeigeWarenPreisAn\(\):  5: 0.0) s
+( 149|SystemSoftware::zeigeVerfallsDatum\(\): 5: 0) s
+( 150|SystemSoftware::zeigeWarenPreisAn\(\):  6: 0.0) s
+( 151|SystemSoftware::zeigeVerfallsDatum\(\): 6: 0) s
+( 152|SystemSoftware::zeigeWarenPreisAn\(\):  7: 0.0) s
+( 153|SystemSoftware::zeigeVerfallsDatum\(\): 7: 0) s
+( 154|*** automat.drehen\(\): jetzt Fach Nr. 3:) s
+( 155|SystemSoftware::zeigeWarenPreisAn\(\):  1: 0.0) s
+( 156|SystemSoftware::zeigeVerfallsDatum\(\): 1: 0) s
+( 157|SystemSoftware::zeigeWarenPreisAn\(\):  2: 0.0) s
+( 158|SystemSoftware::zeigeVerfallsDatum\(\): 2: 0) s
+/sd 1 def
+4 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+( 159|SystemSoftware::zeigeWarenPreisAn\(\):  3: 3.0) s
+( 160|SystemSoftware::zeigeVerfallsDatum\(\): 3: 2) s
+( 161|SystemSoftware::zeigeWarenPreisAn\(\):  4: 0.0) s
+( 162|SystemSoftware::zeigeVerfallsDatum\(\): 4: 0) s
+( 163|SystemSoftware::zeigeWarenPreisAn\(\):  5: 0.0) s
+( 164|SystemSoftware::zeigeVerfallsDatum\(\): 5: 0) s
+( 165|SystemSoftware::zeigeWarenPreisAn\(\):  6: 0.0) s
+( 166|SystemSoftware::zeigeVerfallsDatum\(\): 6: 0) s
+( 167|SystemSoftware::zeigeWarenPreisAn\(\):  7: 0.0) s
+( 168|SystemSoftware::zeigeVerfallsDatum\(\): 7: 0) s
+( 169|=== Drehteller-Test. =================================) s
+( 170|=== \326ffnen-Test: =====================================) s
+( 171|*** Drehteller Nr.5 mit einem Mars f\374llen:) s
+( 172|SystemSoftware::zeigeWarenPreisAn\(\):  5: 1.5) s
+( 173|SystemSoftware::zeigeVerfallsDatum\(\): 5: 1) s
+( 174|*** Automat.gibTotalenWarenWert\(\) = 1.5) s
+( 175|*** kasse.einnehmen\(1.00\):) s
+( 176|SystemSoftware::zeigeBetragAn\(\): 1.0) s
+( 177|*** kasse.einnehmen\(0.50\):) s
+( 178|SystemSoftware::zeigeBetragAn\(\): 1.5) s
+( 179|*** automat.oeffnen\(5\):) s
+( 180|Drehteller::oeffnen\(\): mDrehtellerNr = 5 / mFachVorOeffnung = 3) s
+( 181|SystemSoftware::zeigeBetragAn\(\): 0.0) s
+( 182|SystemSoftware::entriegeln\(\): 5) s
+( 183|SystemSoftware::zeigeWarenPreisAn\(\):  5: 0.0) s
+( 184|SystemSoftware::zeigeVerfallsDatum\(\): 5: 0) s
+( 185|*** automat.oeffnen\(5\): true) s
+( 186|=== \326ffnen-Test. =====================================) s
+( 187|) s
+( 188|*/) s
+/sd 0 def
+2 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+
+%%Trailer
+%%Pages: 2
+docsave restore end
