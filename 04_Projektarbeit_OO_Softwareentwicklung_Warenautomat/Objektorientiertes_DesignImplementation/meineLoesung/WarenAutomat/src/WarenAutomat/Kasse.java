@@ -110,6 +110,10 @@ public class Kasse {
 		SystemSoftware.zeigeBetragAn(eingeworfenerBetragInFranken);
 	}
 	
+	/**
+	 * Kasse wird aktualisiert aufgrund eines verkauften Produktes
+	 * @param muenzenBetrag
+	 */
 	public void verkaufen(int muenzenBetrag){
 		int eingeworfenerBetragNeu = this.getEingeworfenerBetragInRappen() - muenzenBetrag;
 		this.setEingeworfenerBetragInRappen(eingeworfenerBetragNeu);
@@ -168,23 +172,9 @@ public class Kasse {
 		return false;
 	}
 
-	/**
-	 * Prüft ob eine Münze in der Kasse erlaubt ist
-	 * 
-	 * @param pMuenzenBetrag
-	 * @return Münze erlaubt/nicht erlaubt
-	 */
-	private boolean pruefeMuenze(double pMuenzenBetrag) {
-		for (int i = 0; i < erlaubteMuenzenInRappen.length; i++) {
-			if (erlaubteMuenzenInRappen[i] == this.gibRappen(pMuenzenBetrag)) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/**
-	 * Rechnet Franken in Rappen um
+	 * Helper - Rechnet Franken in Rappen um
 	 * 
 	 * @param pMuenzenBetrag
 	 * @return muenzenBetrag in Rappen
@@ -194,16 +184,6 @@ public class Kasse {
 		return einwurfInRappen;
 	}
 	
-	/**
-	 * Rechnet Rappen in Franken um
-	 * 
-	 * @param pMuenzenBetragInRappen
-	 * @return muenzenBetrag in Franken
-	 */
-	private double gibFranken(int pMuenzenBetragInRappen) {
-		double betragInFranken = pMuenzenBetragInRappen / 100.0;
-		return betragInFranken;
-	}
 
 	public int getEingeworfenerBetragInRappen() {
 		return this.eingeworfenerBetragInRappen;
@@ -215,5 +195,31 @@ public class Kasse {
 
 	public void setEingeworfenerBetragInRappen(int eingeworfenerBetragInRappen) {
 		this.eingeworfenerBetragInRappen = eingeworfenerBetragInRappen;
+	}
+	
+	/**
+	 * Helper - Rechnet Rappen in Franken um
+	 * 
+	 * @param pMuenzenBetragInRappen
+	 * @return muenzenBetrag in Franken
+	 */
+	private double gibFranken(int pMuenzenBetragInRappen) {
+		double betragInFranken = pMuenzenBetragInRappen / 100.0;
+		return betragInFranken;
+	}
+	
+	/**
+	 * Prüft ob eine Münze in der Kasse erlaubt ist
+	 * 
+	 * @param pMuenzenBetrag
+	 * @return Münze erlaubt/nicht erlaubt
+	 */
+	private boolean pruefeMuenze(double pMuenzenBetrag) {
+		for (int i = 0; i < this.erlaubteMuenzenInRappen.length; i++) {
+			if (this.erlaubteMuenzenInRappen[i] == this.gibRappen(pMuenzenBetrag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -32,11 +32,18 @@ public class Fach {
 	public Fach(){
 	}
 
+	/**
+	 * Ein Fach wird geleert
+	 */
 	public void leeren(){
 		this.istLeer = true;
 		this.produkt = null;
 	}
 	
+	/**
+	 * Ein Produkt wird in ein Fach gelegt
+	 * @param neuesProdukt
+	 */
 	public void setzeProdukt(Produkt neuesProdukt){
 		this.leeren();
 		this.produkt = neuesProdukt;

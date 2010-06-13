@@ -15,7 +15,6 @@ public class Drehteller {
 	private final static int ANZ_FAECHER = 16;
 	private int aktuelleFachNr;
 	private int drehtellerNr;
-	private Boolean istOffen;
 	private Fach[] faecher = new Fach[Drehteller.ANZ_FAECHER];
 
 	public static void main(String[] args) throws ParseException {
@@ -60,15 +59,16 @@ public class Drehteller {
 	
 
 	public Drehteller(int drehtellerNr){
-		this.aktuelleFachNr = 1;
-		this.drehtellerNr = drehtellerNr;
-		this.istOffen = false;
+		this.setAktuelleFachNr(1);
+		this.setDrehtellerNr(drehtellerNr);
 		for (int i = 0; i < this.faecher.length; i++) {
 			this.faecher[i] = new Fach();
 		}
 	}
 
-
+	/**
+	 * Drehteller drehen
+	 */
 	public void drehen(){
 		if(this.getAktuelleFachNr() == Drehteller.ANZ_FAECHER){
 			this.setAktuelleFachNr(1);
@@ -81,7 +81,7 @@ public class Drehteller {
 	}
 
 	/**
-	 * 
+	 * Aktuelles Fach mit einem Produkt füllen
 	 * @param neuesProdukt
 	 */
 	public void fuelleAktuellesFach(Produkt neuesProdukt){
@@ -90,6 +90,10 @@ public class Drehteller {
 		this.aktualisiereAnzeigeWarenpreis();
 	}
 	
+	/**
+	 * Prüft, ob das aktuelle Fach des Drehtellers leer ist
+	 * @return
+	 */
 	public Boolean pruefeFachLeer(){
 		Boolean fachLeer = this.getAktuellesFach().getIstLeer();
 		return fachLeer;
@@ -104,17 +108,27 @@ public class Drehteller {
 		return this.getAktuellesFach().gibProdukt().istAbgelaufen(aktuellesDatum);
 	}
 	
+	/**
+	 * Das aktuelle Fach des Drehtellers wird zurückgegeben
+	 * @return
+	 */
 	public Fach getAktuellesFach(){
 		Fach aktuellesFach = this.faecher[this.getAktuelleFachNr()-1];
 		return aktuellesFach;
 	}
 	
+	/**
+	 * Öffnet den Drehteller
+	 */
 	public void oeffnen(){
 		this.verkaufeAktuellesProdukt();
 		this.aktualisiereAnzeigeVerfallsDatum();
 		this.aktualisiereAnzeigeWarenpreis();
 	}
 	
+	/**
+	 * Das aktuelle Produkt im aktuellen Fach wird verkauft
+	 */
 	private void verkaufeAktuellesProdukt(){
 		this.getAktuellesFach().gibProdukt().verkaufen();
 		this.getAktuellesFach().leeren();
@@ -125,39 +139,45 @@ public class Drehteller {
 	 */
 	private void aktualisiereAnzeigeVerfallsDatum(){
 		if(this.pruefeFachLeer()){
-			SystemSoftware.zeigeVerfallsDatum(this.drehtellerNr, 0);
+			SystemSoftware.zeigeVerfallsDatum(this.getDrehtellerNr(), 0);
 		}
 		else{
 			Boolean produktAbgelaufen = this.pruefeProduktAbgelaufen();
 			if(produktAbgelaufen){
-				SystemSoftware.zeigeVerfallsDatum(this.drehtellerNr, 2);
+				SystemSoftware.zeigeVerfallsDatum(this.getDrehtellerNr(), 2);
 			}
 			else{
-				SystemSoftware.zeigeVerfallsDatum(this.drehtellerNr, 1);
+				SystemSoftware.zeigeVerfallsDatum(this.getDrehtellerNr(), 1);
 			}
 		}
 		this.aktualisiereWareGui();
 	}
 	
+	/**
+	 * Anzeige Warenpreis in der Hardware wird aktualisiert
+	 */
 	private void aktualisiereAnzeigeWarenpreis(){
 		if(this.pruefeFachLeer()){
-			SystemSoftware.zeigeWarenPreisAn(this.drehtellerNr, 0.00);
+			SystemSoftware.zeigeWarenPreisAn(this.getDrehtellerNr(), 0.00);
 		}
 		else{
 			double warenPreis = this.getAktuellesFach().gibProdukt().getPreisInFranken();
-			SystemSoftware.zeigeWarenPreisAn(this.drehtellerNr, warenPreis);
+			SystemSoftware.zeigeWarenPreisAn(this.getDrehtellerNr(), warenPreis);
 		}	
 		this.aktualisiereWareGui();
 	}
 	
+	/**
+	 * Anzeige Ware in der Hardware wird aktualisiert
+	 */
 	private void aktualisiereWareGui(){
 		if(this.pruefeFachLeer()){
-			SystemSoftware.zeigeWareInGui(this.drehtellerNr, "", null);
+			SystemSoftware.zeigeWareInGui(this.getDrehtellerNr(), "", null);
 		}
 		else{
 			String aktuellerWarenname = this.getAktuellesFach().gibProdukt().gibWarenname();
 			Date aktuellesVerfallsdatum = this.getAktuellesFach().gibProdukt().getVerfallsDatum();
-			SystemSoftware.zeigeWareInGui(this.drehtellerNr, aktuellerWarenname, aktuellesVerfallsdatum);
+			SystemSoftware.zeigeWareInGui(this.getDrehtellerNr(), aktuellerWarenname, aktuellesVerfallsdatum);
 		}		
 	}
 
@@ -170,5 +190,12 @@ public class Drehteller {
 		this.aktuelleFachNr = fachNr;
 	}
 	
+	private int getDrehtellerNr(){
+		return this.drehtellerNr;
+	}
+	
+	private void setDrehtellerNr(int drehtellerNr) {
+		this.drehtellerNr = drehtellerNr;
+	}
 
 }

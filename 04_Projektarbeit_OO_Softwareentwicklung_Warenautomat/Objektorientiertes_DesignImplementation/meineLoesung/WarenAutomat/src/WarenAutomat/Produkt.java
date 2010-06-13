@@ -53,15 +53,22 @@ public class Produkt {
 		return true;
 	}
 
+	/**
+	 * Wird aufgerufen, wenn ein Produkt verkauft wird.
+	 */
+	public void verkaufen(){
+		this.setVerkaufsDatum();
+		this.setIstVerkauft(true);
+	}
+	
 	public int getPreisInRappen(){
 		return this.preisInRappen;
 	}
 	
 	public double getPreisInFranken(){
-		double betragInFranken = this.preisInRappen / 100.0;
+		double betragInFranken = this.getPreisInRappen() / 100.0;
 		return betragInFranken;		
 	}
-
 
 	public Date getVerfallsDatum(){
 		return this.verfallsDatum;
@@ -71,27 +78,21 @@ public class Produkt {
 		return this.warenname;
 	}
 	
-	public void verkaufen(){
-		this.setVerkaufsDatum();
-		this.setIstVerkauft(true);
-	}
 	
 	public Boolean getIstVerkauft() {
 		return istVerkauft;
 	}
 
-
+	public Date getVerkaufsDatum() {
+		return verkaufsDatum;
+	}
+	
 	private void setIstVerkauft(Boolean istVerkauft) {
 		this.istVerkauft = istVerkauft;
 	}
-
-
+	
+	
 	private void setVerkaufsDatum(){
 		this.verkaufsDatum = SystemSoftware.gibAktuellesDatum();
-	}
-
-
-	public Date getVerkaufsDatum() {
-		return verkaufsDatum;
 	}
 }

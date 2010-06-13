@@ -58,7 +58,9 @@ public class Warenbestand {
 //	public double gibTotalVerkaufterWarenwertInFranken(){
 //		return 0.0;
 //	}
+//TODO
 
+	
 	/**
 	 * Gibt den aktuellen Wert aller im Automaten enthaltenen Waren in Franken zurück (excl. abgelaufene Waren).
 	 * @return 
@@ -110,7 +112,7 @@ public class Warenbestand {
 	}
 
 	/**
-	 * Neues Produk zu Warenbestand hinzufügen
+	 * Neues Produkt zu Warenbestand hinzufügen (Produkt wird in Automat gelegt)
 	 * @param neuesProdukt
 	 */
 	public void produktHinzufuegen(Produkt neuesProdukt){
