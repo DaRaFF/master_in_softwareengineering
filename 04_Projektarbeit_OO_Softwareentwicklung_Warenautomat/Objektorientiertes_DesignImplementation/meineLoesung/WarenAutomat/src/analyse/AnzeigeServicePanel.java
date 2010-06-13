@@ -1,4 +1,4 @@
-package ch.hsr.mas2010;
+package analyse;
 
 /**
  * @author FSB

@@ -1,4 +1,6 @@
-package ch.hsr.mas2010;
+package analyse;
+
+import WarenAutomat.Muenze;
 
 /**
  * @author FSB

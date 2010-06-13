@@ -1,4 +1,7 @@
-package ch.hsr.mas2010;
+package analyse;
+
+import WarenAutomat.Drehteller;
+import WarenAutomat.Warenbestand;
 
 /**
  * @author FSB
