@@ -177,9 +177,23 @@ public class WarenAutomatTest {
 
 			 
 			 SystemSoftware.output(true);
-			 System.out.println("=== Anzeige Statistik-Test. =====================================");
 			 
-			 SystemSoftware.setzeAktuellesDatum(df.parse("11.06.2010"));
+			 
+			 System.out.println("=== Bestellung-Test. =====================================");
+			 SystemSoftware.setzeAktuellesDatum(df.parse("01.01.2020"));
+			 automat.konfiguriereBestellung("Fanta", 5, 20);
+			 automat.konfiguriereBestellung("Cola", 4, 5);			 
+			 automat.drehen(); //Fach6
+			 for (int i = 1; i <= 6; i++) {
+					automat.fuelleFach(i, "Fanta", 2.00, df.parse("01.01.2021"));
+			 }
+			 automat.fuelleFach(7, "Fanta", 2.00, df.parse("01.01.2019"));
+			 automat.drehen(); //Fach7
+			 for (int i = 1; i <= 6; i++) {
+				 automat.fuelleFach(i, "Cola", 2.00, df.parse("01.01.2021"));
+			 }
+			 automat.fuelleFach(7, "Fanta", 2.00, df.parse("01.01.2021"));
+			 System.out.println("=== Bestellung-Test. =====================================");
 		}
 
 	}

@@ -1,7 +1,9 @@
 
 package WarenAutomat;
 
+import java.text.ParseException;
 import java.util.Date;
+import java.util.Vector;
 
 
 /**
@@ -16,6 +18,25 @@ public class Automat {
     private Drehteller[] drehteller = new Drehteller[Automat.ANZ_DREHTELLER];
     private Kasse mKasse;
     private Warenbestand warenbestand;
+    private Vector<Bestellung> bestellung = new Vector<Bestellung>();
+    
+	public static void main(String[] args) throws ParseException {
+		// Teste konfiguration Bestellung
+		Automat automat = new Automat();
+		automat.konfiguriereBestellung("Fanta", 5, 10);
+		automat.konfiguriereBestellung("Cola", 2, 5);
+		automat.konfiguriereBestellung("Sprite", 2, 5);
+		automat.konfiguriereBestellung("Snickers", 2, 5);
+		automat.konfiguriereBestellung("Fanta", 11, 11);
+		
+		for (int i = 0; i < automat.bestellung.size(); i++) {
+			String warenname = automat.bestellung.get(i).getWarenname();
+			int grenze = automat.bestellung.get(i).getGrenze();
+			int bestellungAnzahl = automat.bestellung.get(i).getBestellungAnzahl();
+			System.out.println("Produkt: " + warenname + " | Grenze: " + grenze + " | Bestellung Anzahl: " + bestellungAnzahl);
+		}
+		
+	}
     
     /**
        Default-Konstruktor.
@@ -120,11 +141,38 @@ public class Automat {
     		this.gibKasse().verkaufen(produktPreis);
     		this.getDrehteller(pDrehtellerNr).oeffnen();
     		this.gibKasse().gibWechselGeld();
+    		wareBestellen(verkauftesProdukt);
+    		
     	}
     	return oeffnenOk;
     }
     
     /**
+     * Bestellt eine Ware nach, wenn die Grenze der Anzahl einer Ware erreicht ist
+     * @param verkauftesProdukt
+     * @return
+     */
+    public Boolean wareBestellen(Produkt verkauftesProdukt) {
+		Boolean wareBestellen = false;
+		String produktName = verkauftesProdukt.gibWarenname();
+		Bestellung bestellungZuProdukt = this.getBestellung(produktName);
+		if(bestellungZuProdukt != null){
+			int grenze = bestellungZuProdukt.getGrenze();
+			int warenBestandAktuellesProdukt = this.gibWarenbestand().getAnzahlWaren(produktName);
+			if(grenze >= warenBestandAktuellesProdukt){
+				wareBestellen = true;
+			}
+		}
+		
+		if(wareBestellen){
+			int anzahlNachbestellen = bestellungZuProdukt.getBestellungAnzahl();
+			SystemSoftware.bestellen(produktName, anzahlNachbestellen);
+		}
+		
+		return wareBestellen;
+	}
+
+	/**
        Gibt den aktuellen Wert aller im Automaten enthaltenen Waren in Franken zurück (excl. abgelaufene Waren).
        Analyse: 
        Abgeleitetes Attribut
@@ -149,6 +197,52 @@ public class Automat {
 	public Warenbestand gibWarenbestand(){
 		return this.warenbestand;
 	}
+	
+    /**
+    Konfiguration einer automatischen Bestellung.
+    Der Automat setzt automatisch Bestellungen ab mittels 
+    SystemSoftware.bestellen() wenn eine Ware ausgeht.
+
+    pWarenName: Warenname derjenigen Ware, für welchen eine automatische 
+    Bestellung konfiguriert wird.
+
+    pGrenze: bei welcher Anzahl von verbleibenden, nicht abgelaufener 
+    Waren im Automat eine Bestellung abgesetzt werden soll (Bestellung 
+    wenn Waren-Anzahl nicht abgelaufener Waren <= pGrenze).
+
+	pBestellAnzahl: wieviele neue Waren jeweils bestellt werden sollen.
+    */
+
+	public void konfiguriereBestellung(String pWarenName, int pGrenze, int pBestellAnzahl) {
+		Bestellung neueBestellung = new Bestellung(pWarenName, pGrenze, pBestellAnzahl);
+		
+		for (int i = 0; i < this.bestellung.size(); i++) {
+			String nameProduktAktuelleBestellung = this.bestellung.get(i).getWarenname();
+			
+			if(nameProduktAktuelleBestellung.equals(pWarenName)){
+				this.bestellung.remove(i);
+			}
+		}
+		this.bestellung.add(neueBestellung);
+	}
+
+
+	/**
+	 * Gibt die Bestellung einer bestimmten Ware zurück
+	 * @param warenName
+	 * @return
+	 */
+	private Bestellung getBestellung(String warenName){
+		for (int i = 0; i < this.bestellung.size(); i++) {
+			String nameAktuelleBestellung = this.bestellung.get(i).getWarenname();
+			if(nameAktuelleBestellung.equals(warenName)){
+				return this.bestellung.get(i);
+			}
+		}
+		return null;
+	}
+	
+	
     
     
 }

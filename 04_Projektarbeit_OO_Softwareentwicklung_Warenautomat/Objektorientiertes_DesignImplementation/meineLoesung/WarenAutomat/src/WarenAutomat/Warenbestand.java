@@ -81,7 +81,6 @@ public class Warenbestand {
      * Gibt die Anzahl der verkauften Ware 'pName' seit (>=) 'pDatum' als Zahl zurück.
      */
 	public int gibVerkaufsStatistik(String pName, Date pDatum) {
-		System.out.println("" + pName + pDatum);
 		int anzProdukteVerkauft = 0;
 		for (int i = 0; i < this.produkte.size(); i++) {
 			Boolean istProduktVerkauft = this.produkte.get(i).getIstVerkauft();
@@ -118,5 +117,25 @@ public class Warenbestand {
 	public void produktHinzufuegen(Produkt neuesProdukt){
 		this.produkte.add(neuesProdukt);
 	}
+	
+	/**
+	 * Gibt die Anzahl der Produkte zurück, welche Verfügbar sind und gekauft werden können
+	 * @param produktName
+	 * @return
+	 */
+	public int getAnzahlWaren(String produktName){
+		int anzProdukte = 0;
+		for (int i = 0; i < this.produkte.size(); i++) {
+			Boolean istProduktNichtVerkauft = !this.produkte.get(i).getIstVerkauft();
+			Boolean istProduktNichtAbgelaufen = !this.produkte.get(i).istAbgelaufen(SystemSoftware.gibAktuellesDatum());
+			Boolean istGesuchtesProdukt = this.produkte.get(i).gibWarenname().equals(produktName);
+			if(istProduktNichtVerkauft & istGesuchtesProdukt & istProduktNichtAbgelaufen){
+				anzProdukte++;
+			}
+		}	
+		return anzProdukte;
+	}
+	
+
 
 }
