@@ -3,6 +3,6 @@ package testpreparation.alphabetinstantiation;
 public class AlphabetInstantiation {
 
     public static void main(String[] args) {
-        C c = new C(1);
+        C c = new C();
     }
 }

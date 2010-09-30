@@ -3,35 +3,29 @@ package testpreparation.vererbung;
 public class vererbung {
 
     public static void main(String[] args) {
-            Y n = new Y();
+            X x = new Y();
     }
 }
 
 class X {
 
-    Integer mI = new Integer(7777);
-
     X() {
-        this.mI = new Integer(19);
+        System.out.println("X.X()");
         meth();
     }
 
     protected void meth() {
-        System.out.println("X.meth()" + mI);
+        System.out.println("X.meth()");
     }
 }
 
 class Y extends X {
 
-    Integer mI = new Integer(4711);
-
     Y() {
-        this.mI = new Integer(18);
-        super.meth();
-        meth();
+        System.out.println("Y.Y()");
     }
 
     protected void meth() {
-        System.out.println("Y.meth(): " + mI);
+        System.out.println("Y.meth(): ");
     }
 }

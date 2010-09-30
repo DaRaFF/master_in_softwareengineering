@@ -2,9 +2,9 @@ package testpreparation.alphabetinstantiation;
 
 public class E extends D {
 
-    private D mD;
+    private D mD = new D();
+
     E() {
-        mD = new D();
         System.out.print("E ");
     }
 }

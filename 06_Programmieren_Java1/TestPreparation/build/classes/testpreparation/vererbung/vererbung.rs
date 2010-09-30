@@ -1,0 +1,3 @@
+testpreparation.vererbung.Y
+testpreparation.vererbung.X
+testpreparation.vererbung.vererbung

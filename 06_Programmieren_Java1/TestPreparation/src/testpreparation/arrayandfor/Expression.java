@@ -9,6 +9,9 @@ public class Expression {
 
         System.out.println("Ausdruck 8/3 = "+ 8/3);
         System.out.println("Ausdruck 8.0/3 = "+ 8.0/3);
+        System.out.println("Ausdruck 11 % 8 = "+ 11 % 8);
+
+        System.out.println("Ausdruck von 2 > 5 / 2 = "+ (7 > 5 / 2));
 
         System.out.println("Ein Leerstring ist vom Typ "+ "".getClass().getName());
     }
