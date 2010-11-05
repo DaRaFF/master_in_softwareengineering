@@ -1,0 +1,811 @@
+%!PS-Adobe-3.0
+%%Creator: A2ps version 4.3
+%%CreationDate: Sun Sep 19 15:46:34 2010
+%%Pages: (atend)
+%%DocumentFonts: Courier Courier-Bold Helvetica Helvetica-Bold
+%%EndComments
+% Copyright (c) 1993, 1994, Miguel Santana, M.Santana@frgu.bull.fr
+
+/$a2psdict 100 dict def
+$a2psdict begin
+
+% General macros.
+/xdef {exch def} bind def
+/getfont {exch findfont exch scalefont} bind def
+
+% Set up ISO Latin 1 character encoding
+/reencodeISO {
+	dup dup findfont dup length dict begin
+	{ 1 index /FID ne { def }{ pop pop } ifelse
+	} forall
+	/Encoding ISOLatin1Encoding def
+	currentdict end definefont
+} def
+/Helvetica-Bold reencodeISO def
+/Helvetica reencodeISO def
+/Courier reencodeISO def
+/Courier-Bold reencodeISO def
+
+% Create Courier backspace font
+/backspacefont {
+    /Courier findfont dup length dict begin
+	{ % forall
+	    1 index /FID eq { pop pop } { def } ifelse
+	} forall
+	currentdict /UniqueID known { % if
+	    /UniqueID UniqueID 16#800000 xor def
+	} if
+	CharStrings length 1 add dict begin
+	    CharStrings { def } forall
+	    /backspace { -600 0 0 0 0 0 setcachedevice } bind def
+	    currentdict
+	end
+	/CharStrings exch def
+	/Encoding Encoding 256 array copy def
+	Encoding 8 /backspace put
+	currentdict
+    end
+    definefont pop
+} bind def
+
+% FUNCTIONS
+
+% Function filename: Initialize file printing.
+/fn
+{ /filenm xdef
+  /filenmwidth filenm stringwidth pop def
+  /filenmfont
+       filenmwidth fns gt
+       {
+	       filenmfontname
+	       fnfs fns mul filenmwidth div
+	     getfont
+       }
+       { sfnf }
+     ifelse
+  def
+} bind def
+
+% Function header: prints page header. no page
+% is passed as argument.
+/hp
+  { x sd get  y sd get hs sub 1 add  moveto
+    df setfont
+    gsave
+      x sd get y sd get moveto
+      0 hs 2 div neg rmoveto 
+      hs setlinewidth
+      0.95 setgray
+      pw 0 rlineto stroke
+    grestore
+    gsave
+      dfs hm rmoveto
+      d show				% date/hour
+    grestore
+    gsave
+      pnum cvs pop				% page pop up
+        pw (Page 999) stringwidth pop sub
+        hm
+	  rmoveto
+      (Page ) show pnum show		% page number
+    grestore
+    empty pnum copy pop
+    gsave
+      filenmfont setfont
+         fns filenm stringwidth pop sub 2 div dw add
+          bm 2 mul 
+        add 
+        hm
+      rmoveto
+        filenm show			% file name
+      grestore
+    } bind def
+
+% Function border: prints border page
+/border 
+{ x sd get y sd get moveto
+  gsave				% print four sides
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function hborder: completes border of the header.
+/hborder 
+{ gsave
+	0.7 setlinewidth
+	0 hs neg rmoveto
+	pw 0 rlineto
+	stroke
+  grestore
+} bind def
+
+% Function sheetnumber: prints the sheet number.
+/sn
+    { snx sny moveto
+      df setfont
+      pnum cvs
+	  dup stringwidth pop (0) stringwidth pop sub neg 0 rmoveto show
+      empty pnum copy pop
+    } bind def
+
+% Function loginprint: prints the login id of the requestor.
+/lgp
+    { lx ly moveto
+      df setfont
+      dup stringwidth pop neg 0 rmoveto show
+    } bind def
+
+% Function currentdate: prints the current date.
+/cd
+    { dx dy moveto
+      df setfont
+      (Printed: ) show
+      td show
+    } bind def
+
+% Function filename_footer: prints the file name at bottom of page.
+/fnf
+    { fnx fny moveto
+      df setfont
+      filenm center show
+    } bind def
+
+% Function center: centers text.
+/center
+    { dup stringwidth pop
+      2 div neg 0 rmoveto
+    } bind def
+
+% Function s: print a source line
+/s  { show
+      /y0 y0 bfs sub def
+      x0 y0 moveto
+    } bind def
+
+% Functions b and st: change to bold or standard font
+/b  { show
+      bdf setfont
+    } bind def
+/st { show
+      bf setfont
+    } bind def
+
+% Strings used to make easy printing numbers
+/pnum 12 string def
+/empty 12 string def
+
+% Global initializations
+
+/CourierBack backspacefont
+/filenmfontname /Helvetica-Bold def
+/inch {72 mul} bind def
+
+%
+% Meaning of some variables and functions (coded names)
+%
+%	twp:		twinpages?
+%	sd:		sheet side
+%	l:		line counter
+%	c:		column counter
+%	d:		date
+%	td:		current date (for today)
+%	lg:		login name
+%	fn:		filename printing function
+%	sn:		sheetnumber printing function
+%	cd:		current date printing function
+%	fnf:		filename footer printing function
+%	lgp:		login printing function
+%	hp:		header printing function
+%	y:		y coordinate for the logical page
+%	x:		x coordinate for the logical page
+%	sny:		y coordinate for the sheet number
+%	snx:		x coordinate for the sheet number
+%	dy:		y coordinate for the date
+%	dx:		x coordinate for the date
+%	ly:		y coordinate for the login
+%	lx:		x coordinate for the login
+%	scx:		x coordinate for the sheet center
+%	fny:		y coordinate for the filename (footer)
+%	fnx:		x coordinate for the filename (footer)
+%	fnfs:		filename font size
+%	bfs:		body font size
+%	dfs:		date font size
+%	bfs:		body font size
+%	df:		date font
+%	bf:		body font
+%	bdf:		bold font
+%	sfnf:		standard filename font
+%	dw:		date width
+%	pw:		page width
+%	sw:		sheet width
+%	ph:		page height
+%	sh:		sheet height
+%	hm:		header margin
+%	tm:		top margin
+%	bm:		body margin
+%	rm:		right margin
+%	lm:		left margin
+%	hs:		header size
+%	fns:		filename size
+
+% Initialize page description variables.
+/x0 0 def
+/y0 0 def
+/sh 11.64 inch def
+/sw 8.27 inch def
+/margin 1.4 inch def
+/rm margin 3 div def
+/lm margin 2 mul 3 div def
+/d () def
+/td (Sep 19 2010 15:46) def
+/lg (Printed by Thomas Letsch from Orion1) def
+%%EndProlog
+
+/docsave save def
+%%Page: 1 1
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (Sep 19 2010 15:42) def
+( PersonTest.cpp ) fn
+sw 0 translate
+90 rotate
+1 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|//==============================================================================) s
+(   2|//        * Letsch Informatik *       www.LetsInfo.ch       CH-8636 Wald) s
+(   3|//          Beratung, Ausbildung und Realisation in Software-Engineering) s
+(   4|//==============================================================================) s
+(   5|// Project   : Master of Advanced Studies in Software-Engineering MAS-SE 2010) s
+(   6|// Modul     : C++) s
+(   7|// Title     : \334bung "Klasse Person": L\366sung) s
+(   8|// Author    : Thomas Letsch) s
+(   9|// Tab-Width : 2) s
+(  10|/*///===========================================================================) s
+(  11|* Description: Klasse implementieren und erweitern aufgrund applikatorischer) s
+(  12|*              Anforderungen.) s
+(  13|* History    : 11.01.04: Initial Version.) s
+(  14|*              29.10.05: Anpassung wegen Eclipse/CDT-Bug) s
+(  15|*                        \(siehe Bugzilla Bug #102043\)) s
+(  16|*              01.10.07: Anpassung wegen Eclipse/CDT-Bug wieder entfernt.) s
+(  17|*              02.11.08: Merge f\374r MAS.) s
+(  18|*              19.09.10: inline -> Optimierung) s
+(  19|* Version    : $Revision: 1.13 $  $Date: 2010/09/19 15:36:33 $) s
+(  20|/*///===========================================================================) s
+(  21|//       1         2         3         4         5         6         7         8) s
+(  22|//345678901234567890123456789012345678901234567890123456789012345678901234567890) s
+(  23|//==============================================================================) s
+(  24|) s
+(  25|#include <iostream>) s
+(  26|#include <cstring>) s
+(  27|#include "Person.h") s
+(  28|#include "StatisticStopWatch.h") s
+(  29|) s
+(  30|using namespace std;) s
+(  31|) s
+(  32|void aufgabe1\(\);) s
+(  33|void aufgabe2\(\);) s
+(  34|void aufgabe4\(\);) s
+(  35|) s
+(  36|int main\(int argc, char* argv[]\) {) s
+(  37|) s
+(  38|  if \(\(argc == 2\) && \(strcmp\(argv[1], "OnlyStackVsHeap"\) == 0\)\) {) s
+(  39|    aufgabe2\(\);) s
+(  40|  }) s
+(  41|  else {) s
+(  42|    aufgabe1\(\);) s
+(  43|    aufgabe2\(\);) s
+(  44|    aufgabe4\(\);) s
+(  45|  }) s
+(  46|  return 0;) s
+(  47|) s
+(  48|}) s
+(  49|) s
+(  50|) s
+/sd 1 def
+2 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(  51|void aufgabe1\(\) {) s
+(  52|  // Klasse, Strings, char-Array, Arrays von Objekten:) s
+(  53|  cout << endl << "Aufgabe 1:" << endl;) s
+(  54|) s
+(  55|  const int MAX_ARR = 5;) s
+(  56|) s
+(  57|  Person persArr[MAX_ARR];) s
+(  58|  cout << endl << "Personen-Array:" << endl;) s
+(  59|  for \(int i = 0; i < MAX_ARR; i++\) {) s
+(  60|    cout << persArr[i].getNr\(\) << ": " << persArr[i].getName\(\) << endl;) s
+(  61|  }) s
+(  62|  persArr[0].setName\("Miller"\);) s
+(  63|  persArr[0].setNr\(1\);) s
+(  64|  persArr[1].setName\("Bond"\);) s
+(  65|  persArr[1].setNr\(007\);) s
+(  66|  cout << endl << "Personen-Array:" << endl;) s
+(  67|  for \(int i = 0; i < MAX_ARR; i++\) {) s
+(  68|    cout << persArr[i].getNr\(\) << ": " << persArr[i].getName\(\) << endl;) s
+(  69|  }) s
+(  70|) s
+(  71|  // Ausgabe des Personen-Arrays wie oben mit for-Schleifen, jetzt aber mit) s
+(  72|  // Funktion 'printPersArr\(\)':) s
+(  73|  cout << endl << "Personen-Array mit \\'printPersArr\(\)\\':" << endl;) s
+(  74|  printPersArr\(persArr, MAX_ARR\);) s
+(  75|}) s
+(  76|) s
+(  77|) s
+(  78|void aufgabe2\(\) {) s
+(  79|  // Untersuchung wieviel Zeit Objekt-Allozierungen auf Stack und Heap benoetigen:) s
+(  80|  cout << endl << "Aufgabe 2: Stack vs. Heap:" << endl;) s
+(  81|) s
+(  82|  StatisticStopWatch stopWatch;) s
+(  83|  const int MAX_LOOP = 10000000;) s
+(  84|) s
+(  85|  // Allozierung auf dem Stack:) s
+(  86|  stopWatch.reset\(\);) s
+(  87|  stopWatch.start\(\);) s
+(  88|  for \(int i = 0; i < MAX_LOOP; i++\) {) s
+(  89|    Person pers\(i, "John"\);) s
+(  90|  }) s
+(  91|  stopWatch.stop\(\);) s
+(  92|  stopWatch.printTime\("Stack"\);) s
+(  93|) s
+(  94|  // Allozierung auf dem Heap:) s
+(  95|  stopWatch.reset\(\);) s
+(  96|  stopWatch.start\(\);) s
+(  97|  for \(int i = 0; i < MAX_LOOP; i++\) {) s
+(  98|    Person* pers = new Person\(i, "John"\);) s
+(  99|  }) s
+( 100|  stopWatch.stop\(\);) s
+( 101|  stopWatch.printTime\("Heap: new\(\)"\);) s
+( 102|}) s
+( 103|) s
+( 104|) s
+( 105|void aufgabe4\(\) {) s
+( 106|  // Links-Shift-Operator \(<<\) und 'const':) s
+( 107|  cout << endl << "Aufgabe 4:" << endl;) s
+( 108|) s
+( 109|  Person tom\(1, "Tom"\);) s
+( 110|  Person john = "John Smith";) s
+( 111|  cout << tom << john;) s
+( 112|) s
+( 113|  const Person bond\(4711, "James Bond"\);) s
+( 114|  cout << bond;) s
+( 115|  cout << bond.getNr\(\);) s
+( 116|}) s
+( 117|) s
+( 118|) s
+/sd 0 def
+1 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+%%Page: 2 2
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (Sep 19 2010 15:42) def
+( PersonTest.cpp ) fn
+sw 0 translate
+90 rotate
+3 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+( 119|/* Session-Log:) s
+( 120|) s
+( 121|$ make clean all) s
+( 122|rm -f Person.o PersonTest.o StatisticStopWatch.o appl.exe) s
+( 123|g++ -g -O0 -c Person.cpp) s
+( 124|g++ -g -O0 -c PersonTest.cpp) s
+( 125|g++ -g -O0 -c StatisticStopWatch.cpp) s
+( 126|g++ -g -O0 -o appl.exe Person.o PersonTest.o StatisticStopWatch.o) s
+( 127|) s
+( 128|$ ./appl.exe) s
+( 129|) s
+( 130|Aufgabe 1:) s
+( 131|) s
+( 132|Personen-Array:) s
+( 133|-1:) s
+( 134|-1:) s
+( 135|-1:) s
+( 136|-1:) s
+( 137|-1:) s
+( 138|) s
+( 139|Personen-Array:) s
+( 140|1: Miller) s
+( 141|7: Bond) s
+( 142|-1:) s
+( 143|-1:) s
+( 144|-1:) s
+( 145|) s
+( 146|Personen-Array mit 'printPersArr\(\)':) s
+( 147|1: Miller) s
+( 148|7: Bond) s
+( 149|-1:) s
+( 150|-1:) s
+( 151|-1:) s
+( 152|) s
+( 153|Aufgabe 2: Stack vs. Heap:) s
+( 154|Stack                =        250 ms) s
+( 155|Heap: new\(\)          =       2040 ms) s
+( 156|) s
+( 157|Aufgabe 4:) s
+( 158|Name: Tom                   Nr: 1) s
+( 159|Name: John Smith            Nr: -1) s
+( 160|Name: James Bond            Nr: 4711) s
+( 161|4711) s
+( 162|$) s
+( 163|) s
+( 164|) s
+/sd 1 def
+4 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+( 165|# Aufgabe 3:) s
+( 166|) s
+( 167|$ for i in O0 O1 O2 O3) s
+( 168|> do) s
+( 169|>   echo "") s
+( 170|>   echo "Optimization $i:") s
+( 171|>   g++ -$i -o appl.exe Person.cpp PersonTest.cpp StatisticStopWatch.cpp) s
+( 172|>   ./appl.exe OnlyStackVsHeap) s
+( 173|> done) s
+( 174|) s
+( 175|Optimization-Level: O0 :) s
+( 176|) s
+( 177|Aufgabe 2: Stack vs. Heap:) s
+( 178|Stack                =        256 ms) s
+( 179|Heap: new\(\)          =       2031 ms) s
+( 180|) s
+( 181|Optimization-Level: O1 :) s
+( 182|) s
+( 183|Aufgabe 2: Stack vs. Heap:) s
+( 184|Stack                =        220 ms) s
+( 185|Heap: new\(\)          =       2015 ms) s
+( 186|) s
+( 187|Optimization-Level: O2 :) s
+( 188|) s
+( 189|Aufgabe 2: Stack vs. Heap:) s
+( 190|Stack                =        188 ms) s
+( 191|Heap: new\(\)          =       1937 ms) s
+( 192|) s
+( 193|Optimization-Level: O3 :) s
+( 194|) s
+( 195|Aufgabe 2: Stack vs. Heap:) s
+( 196|Stack                =        150 ms) s
+( 197|Heap: new\(\)          =       1920 ms) s
+( 198|) s
+( 199|*/) s
+/sd 0 def
+2 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+%%Page: 3 3
+/pagesave save def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 0 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (Sep 19 2010 15:40) def
+( Person.h ) fn
+sw 0 translate
+90 rotate
+1 hp
+border
+hborder
+/x0 x 0 get bm add def
+/y0 y 0 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|#ifndef PERSON_H) s
+(   2|#define PERSON_H 1) s
+(   3|) s
+(   4|#include <cstring>) s
+(   5|#include <iostream>) s
+(   6|) s
+(   7|using std::ostream;) s
+(   8|) s
+(   9|) s
+(  10|// Klassen-Definition:) s
+(  11|) s
+(  12|// Person:) s
+(  13|// Eine Person hat einen Namen \(20 Char's\) und eine Nummer.) s
+(  14|) s
+(  15|const int NAME_LEN = 20;) s
+(  16|) s
+(  17|class Person {) s
+(  18|) s
+(  19|  enum {NAME_LEN = 20};  // andere Variante:) s
+(  20|                         // G\374ltigkeitsbereich auf Klasse beschraenkt.) s
+(  21|) s
+(  22|) s
+(  23|  friend ostream& operator<<\(ostream& pOS, const Person& pPerson\);) s
+(  24|) s
+(  25|  public:) s
+(  26|                  Person\(const char* pName = 0\);) s
+(  27|                  Person\(int pNr, const char* pName\);) s
+(  28|    int           getNr\(\) const;) s
+(  29|    const char*   getName\(\) const;) s
+(  30|    void          setNr\(int pNr\);) s
+(  31|    void          setName\(const char* pName\);) s
+(  32|) s
+(  33|  private:) s
+(  34|    int   mNr;) s
+(  35|    char  mName[NAME_LEN+1];) s
+(  36|) s
+(  37|};) s
+(  38|) s
+(  39|) s
+(  40|// Funktions-Prototypen:) s
+(  41|) s
+(  42|// Ausgabe eines Arrays von Personen-Objekten auf die Konsole.) s
+(  43|//   pPers: Pointer auf erstes Personen-Objekt im Array.) s
+(  44|//   pLen:  Laenge des Personen-Arrays.) s
+(  45|void printPersArr\(Person* pPers, int pLen\);) s
+(  46|) s
+(  47|) s
+(  48|#endif /*PERSON_H*/) s
+/sd 1 def
+/twp true def
+/fnfs 11 def
+/dfs fnfs 0.8 mul def
+/df /Helvetica dfs getfont def
+/dw df setfont td stringwidth pop def
+/sfnf filenmfontname fnfs getfont def
+/hm fnfs 0.25 mul def
+/hs 0.22 inch def
+/bfs 6.8 def
+/bdf /Courier-Bold bfs getfont def
+/bm bfs 0.7 mul def
+/bf /CourierBack bfs getfont def
+/l 69 def
+/c 89 def
+/pw
+   bf setfont (0) stringwidth pop c mul bm dup add add
+   def
+/ph
+   bfs l mul bm dup add add hs add
+   def
+/fns
+      pw
+      fnfs 4 mul dw add (Page 999) stringwidth pop add
+    sub
+  def
+/tm margin twp {3} {2} ifelse div def
+/sd 1 def
+/y [ rm ph add bm add
+          dup ] def
+/sny dfs dfs add def
+/snx sh tm dfs add sub def
+/dy sny def
+/dx tm dfs add def
+/x [ tm			% left page
+          dup 2 mul pw add	% right page
+        ] def
+/scx sh 2 div def
+/fny dy def
+/fnx scx def
+/ly fnfs 2 div y sd get add def
+/lx snx def
+/d (Nov  2 2008 17:18) def
+( Person.cpp ) fn
+1 hp
+border
+hborder
+/x0 x 1 get bm add def
+/y0 y 1 get bm bfs add hs add sub def
+x0 y0 moveto
+bf setfont
+(   1|) s
+(   2|#include "Person.h") s
+(   3|#include <iomanip>) s
+(   4|) s
+(   5|using std::ostream;) s
+(   6|using std::cout;) s
+(   7|using std::endl;) s
+(   8|using std::setw;) s
+(   9|using std::left;) s
+(  10|) s
+(  11|// Methoden-Implementationen:) s
+(  12|) s
+(  13|) s
+(  14|Person::Person\(const char* pName\) : mNr\(-1\) {) s
+(  15|  if \(pName == 0\) {) s
+(  16|    mName[0] = '\\0';  // Null-Byte als erstes Byte im Array.) s
+(  17|  }) s
+(  18|  else {) s
+(  19|    setName\(pName\);) s
+(  20|  }) s
+(  21|}) s
+(  22|) s
+(  23|) s
+(  24|Person::Person\(int pNr, const char* pName\) : mNr\(pNr\) {) s
+(  25|  setName\(pName\);) s
+(  26|}) s
+(  27|) s
+(  28|) s
+(  29|int Person::getNr\(\) const {) s
+(  30|  return mNr;) s
+(  31|}) s
+(  32|) s
+(  33|) s
+(  34|const char* Person::getName\(\) const {) s
+(  35|  return mName;) s
+(  36|}) s
+(  37|) s
+(  38|) s
+(  39|void Person::setNr\(int pNr\) {) s
+(  40|  mNr = pNr;) s
+(  41|}) s
+(  42|) s
+(  43|) s
+(  44|void Person::setName\(const char* pName\) {) s
+(  45|  strcpy\(mName, pName\);) s
+(  46|}) s
+(  47|) s
+(  48|) s
+(  49|// Funktions-Implementationen:) s
+(  50|) s
+(  51|void printPersArr\(Person* pPers, int pLen\) {) s
+(  52|  for \(int i = 0; i < pLen; i++\) {) s
+(  53|    cout << pPers->getNr\(\) << ": " << pPers->getName\(\) << endl;) s
+(  54|    pPers++;  // pPers soll auf 'naechste' Person zeigen \(-> Zeiger-Arithmetik\)) s
+(  55|  }) s
+(  56|}) s
+(  57|) s
+(  58|) s
+(  59|// Operator als globale Funktion:) s
+(  60|) s
+(  61|ostream& operator<<\(ostream& pOutputStream, const Person& pPerson\) {) s
+(  62|  pOutputStream <<  "Name: " << setw\(Person::NAME_LEN\) << left << pPerson.mName) s
+(  63|                << "  Nr: " << pPerson.mNr << "\\n";) s
+(  64|  return pOutputStream;) s
+(  65|}) s
+/sd 0 def
+3 sn
+fnf
+lg lgp
+pagesave restore
+showpage
+
+%%Trailer
+%%Pages: 3
+docsave restore end
